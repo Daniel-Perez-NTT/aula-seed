@@ -1,0 +1,269 @@
+{
+  "codigo": "PLAN-2024",
+  "version": "1.2.0",
+  "creditos_titulo": 192,
+  "limite_creditos_curso": 60,
+  "max_convocatorias": 6,
+  "umbral_final_carrera": 12,
+  "asignaturas": [
+    {
+      "codigo": "MAT101",
+      "nombre": "Matematica discreta",
+      "creditos": 6,
+      "curso": 1,
+      "prerrequisitos": []
+    },
+    {
+      "codigo": "PRG101",
+      "nombre": "Programacion I",
+      "creditos": 9,
+      "curso": 1,
+      "prerrequisitos": []
+    },
+    {
+      "codigo": "FIS101",
+      "nombre": "Fisica de computadores",
+      "creditos": 6,
+      "curso": 1,
+      "prerrequisitos": []
+    },
+    {
+      "codigo": "ALG101",
+      "nombre": "Algebra lineal",
+      "creditos": 6,
+      "curso": 1,
+      "prerrequisitos": []
+    },
+    {
+      "codigo": "ING101",
+      "nombre": "Ingles tecnico",
+      "creditos": 3,
+      "curso": 1,
+      "prerrequisitos": []
+    },
+    {
+      "codigo": "PRG102",
+      "nombre": "Programacion II",
+      "creditos": 9,
+      "curso": 1,
+      "prerrequisitos": [
+        "PRG101"
+      ]
+    },
+    {
+      "codigo": "EST101",
+      "nombre": "Estadistica",
+      "creditos": 6,
+      "curso": 1,
+      "prerrequisitos": [
+        "MAT101"
+      ]
+    },
+    {
+      "codigo": "SIS101",
+      "nombre": "Sistemas operativos I",
+      "creditos": 6,
+      "curso": 1,
+      "prerrequisitos": []
+    },
+    {
+      "codigo": "RED101",
+      "nombre": "Redes de computadores",
+      "creditos": 6,
+      "curso": 1,
+      "prerrequisitos": []
+    },
+    {
+      "codigo": "EMP101",
+      "nombre": "Empresa y gestion",
+      "creditos": 3,
+      "curso": 1,
+      "prerrequisitos": []
+    },
+    {
+      "codigo": "EDA201",
+      "nombre": "Estructuras de datos",
+      "creditos": 9,
+      "curso": 2,
+      "prerrequisitos": [
+        "PRG102"
+      ]
+    },
+    {
+      "codigo": "BDA201",
+      "nombre": "Bases de datos",
+      "creditos": 6,
+      "curso": 2,
+      "prerrequisitos": [
+        "PRG102"
+      ]
+    },
+    {
+      "codigo": "ISW201",
+      "nombre": "Ingenieria del software",
+      "creditos": 6,
+      "curso": 2,
+      "prerrequisitos": [
+        "PRG102"
+      ]
+    },
+    {
+      "codigo": "SIS201",
+      "nombre": "Sistemas operativos II",
+      "creditos": 6,
+      "curso": 2,
+      "prerrequisitos": [
+        "SIS101"
+      ]
+    },
+    {
+      "codigo": "RED201",
+      "nombre": "Redes avanzadas",
+      "creditos": 6,
+      "curso": 2,
+      "prerrequisitos": [
+        "RED101"
+      ]
+    },
+    {
+      "codigo": "IAR201",
+      "nombre": "Inteligencia artificial",
+      "creditos": 6,
+      "curso": 2,
+      "prerrequisitos": [
+        "EST101",
+        "EDA201"
+      ]
+    },
+    {
+      "codigo": "WEB201",
+      "nombre": "Desarrollo web",
+      "creditos": 6,
+      "curso": 2,
+      "prerrequisitos": [
+        "PRG102"
+      ]
+    },
+    {
+      "codigo": "SEG201",
+      "nombre": "Seguridad informatica",
+      "creditos": 6,
+      "curso": 2,
+      "prerrequisitos": [
+        "RED101"
+      ]
+    },
+    {
+      "codigo": "ARQ201",
+      "nombre": "Arquitectura de computadores",
+      "creditos": 6,
+      "curso": 2,
+      "prerrequisitos": [
+        "FIS101"
+      ]
+    },
+    {
+      "codigo": "CAL201",
+      "nombre": "Calidad del software",
+      "creditos": 3,
+      "curso": 2,
+      "prerrequisitos": [
+        "ISW201"
+      ]
+    },
+    {
+      "codigo": "CLD301",
+      "nombre": "Computacion en la nube",
+      "creditos": 6,
+      "curso": 3,
+      "prerrequisitos": [
+        "SIS201",
+        "RED201"
+      ]
+    },
+    {
+      "codigo": "DAT301",
+      "nombre": "Ingenieria de datos",
+      "creditos": 6,
+      "curso": 3,
+      "prerrequisitos": [
+        "BDA201"
+      ]
+    },
+    {
+      "codigo": "AGT301",
+      "nombre": "Sistemas de agentes",
+      "creditos": 6,
+      "curso": 3,
+      "prerrequisitos": [
+        "IAR201"
+      ]
+    },
+    {
+      "codigo": "DVO301",
+      "nombre": "Entrega continua",
+      "creditos": 6,
+      "curso": 3,
+      "prerrequisitos": [
+        "ISW201",
+        "CLD301"
+      ]
+    },
+    {
+      "codigo": "MOV301",
+      "nombre": "Desarrollo movil",
+      "creditos": 6,
+      "curso": 3,
+      "prerrequisitos": [
+        "WEB201"
+      ]
+    },
+    {
+      "codigo": "SEG301",
+      "nombre": "Seguridad en la nube",
+      "creditos": 6,
+      "curso": 3,
+      "prerrequisitos": [
+        "SEG201",
+        "CLD301"
+      ]
+    },
+    {
+      "codigo": "GOB301",
+      "nombre": "Gobierno de sistemas de IA",
+      "creditos": 3,
+      "curso": 3,
+      "prerrequisitos": [
+        "AGT301"
+      ]
+    },
+    {
+      "codigo": "PRY301",
+      "nombre": "Proyecto integrador",
+      "creditos": 9,
+      "curso": 3,
+      "prerrequisitos": [
+        "DVO301",
+        "CAL201"
+      ]
+    },
+    {
+      "codigo": "TFG401",
+      "nombre": "Trabajo fin de grado",
+      "creditos": 12,
+      "curso": 4,
+      "prerrequisitos": [
+        "PRY301"
+      ]
+    },
+    {
+      "codigo": "PRA401",
+      "nombre": "Practicas en empresa",
+      "creditos": 12,
+      "curso": 4,
+      "prerrequisitos": [
+        "PRY301"
+      ]
+    }
+  ]
+}
