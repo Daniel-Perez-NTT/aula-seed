@@ -1,0 +1,3 @@
+/labs/ @David-Omenaca-NTT
+/manifiestos/ @David-Omenaca-NTT
+/.github/ @David-Omenaca-NTT
