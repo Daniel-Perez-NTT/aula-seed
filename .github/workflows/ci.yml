@@ -1,0 +1,68 @@
+name: ci
+
+on:
+  pull_request:
+
+jobs:
+  tamano-pr:
+    runs-on: ubuntu-latest
+    env:
+      LIMITE_LINEAS: 400
+
+    steps:
+      - name: Comprobar tamaño del diff
+        env:
+          ADDITIONS: ${{ github.event.pull_request.additions }}
+          DELETIONS: ${{ github.event.pull_request.deletions }}
+        run: |
+          TOTAL=$((ADDITIONS + DELETIONS))
+
+          echo "Diff: +$ADDITIONS -$DELETIONS = $TOTAL líneas (límite: $LIMITE_LINEAS)"
+
+          if [ "$TOTAL" -gt "$LIMITE_LINEAS" ]; then
+            echo "::error::El PR supera las $LIMITE_LINEAS líneas ($TOTAL). Divídelo."
+            exit 1
+          fi
+
+  commits:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validar mensajes de commit
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          REGEX='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9._-]+\))?!?: .+'
+          FALLO=0
+
+          MERGE_BASE=$(git merge-base "$BASE" "$HEAD")
+
+          while IFS= read -r msg; do
+            if ! [[ "$msg" =~ $REGEX ]]; then
+              echo "::error::Commit no válido: '$msg'"
+              FALLO=1
+            fi
+          done < <(git log --no-merges --format=%s "$MERGE_BASE..$HEAD")
+
+          exit $FALLO
+
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar pytest
+        run: pip install pytest
+
+      - name: Ejecutar tests
+        run: pytest -q
