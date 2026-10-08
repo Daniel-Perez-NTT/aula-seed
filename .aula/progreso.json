@@ -13,12 +13,12 @@
       "sellada": null
     },
     "S0": {
-      "estado": "en curso",
+      "estado": "superable",
       "pistas": 0,
-      "intentos": 0,
+      "intentos": 2,
       "predicciones": {
-        "aciertos": 0,
-        "total": 0
+        "aciertos": 1,
+        "total": 2
       },
       "desbloqueada": false,
       "sellada": null
