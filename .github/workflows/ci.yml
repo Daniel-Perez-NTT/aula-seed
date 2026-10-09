@@ -2,9 +2,13 @@ name: ci
 
 on:
   pull_request:
+  push:
+    branches:
+      - main
 
 jobs:
   tamano-pr:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     env:
       LIMITE_LINEAS: 400
@@ -16,7 +20,6 @@ jobs:
           DELETIONS: ${{ github.event.pull_request.deletions }}
         run: |
           TOTAL=$((ADDITIONS + DELETIONS))
-
           echo "Diff: +$ADDITIONS -$DELETIONS = $TOTAL líneas (límite: $LIMITE_LINEAS)"
 
           if [ "$TOTAL" -gt "$LIMITE_LINEAS" ]; then
@@ -25,6 +28,7 @@ jobs:
           fi
 
   commits:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
@@ -39,7 +43,6 @@ jobs:
         run: |
           REGEX='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9._-]+\))?!?: .+'
           FALLO=0
-
           MERGE_BASE=$(git merge-base "$BASE" "$HEAD")
 
           while IFS= read -r msg; do
@@ -53,16 +56,79 @@ jobs:
 
   tests:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Obtener el código
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Preparar Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Instalar pytest
-        run: pip install pytest
+      - name: Instalar dependencias
+        run: python -m pip install -r requirements.txt
 
-      - name: Ejecutar tests
-        run: pytest -q
+      - name: Ejecutar pruebas y cobertura
+        run: python -m pytest tests/ --cov=src/aula/dominio --cov-report=term-missing
+
+      - name: Construir imagen
+        run: docker build -t aula:s1 .
+
+      - name: Arrancar contenedor
+        run: docker run --detach --name aula-s1 -p 8000:8000 aula:s1
+
+      - name: Comprobar el servicio dentro del contenedor
+        shell: bash
+        run: |
+          for intento in {1..10}; do
+            if curl --fail http://127.0.0.1:8000/salud; then
+              exit 0
+            fi
+            sleep 2
+          done
+
+          docker logs aula-s1
+          exit 1
+
+      - name: Limpiar contenedor
+        if: always()
+        run: docker rm --force aula-s1
+
+  publicar:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Obtener el código
+        uses: actions/checkout@v4
+
+      - name: Iniciar sesión en GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Preparar Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Crear etiquetas
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+
+      - name: Construir y publicar imagen
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
