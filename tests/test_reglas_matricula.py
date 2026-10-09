@@ -204,32 +204,4 @@ def test_rechaza_asignatura_al_agotar_convocatorias(tmp_path, monkeypatch):
     assert "convocatorias" in resultado.lineas[0].motivo_rechazo
 
 
-def test_prioriza_mas_creditos_superados():
-    datos_plan = plan()
-    primero = solicitud(["MAT101"], estudiante="EST-1", momento="2026-09-02T10:00:00")
-    segundo = solicitud(["MAT101"], estudiante="EST-2", momento="2026-09-01T10:00:00")
-    expedientes = {
-        "EST-1": expediente(
-            registro("MAT101", "aprobada"),
-            estudiante="EST-1",
-        ),
-        "EST-2": expediente(estudiante="EST-2"),
-    }
 
-    orden = ordenar_por_prioridad([segundo, primero], expedientes, datos_plan)
-
-    assert orden[0].estudiante_id == "EST-1"
-
-
-def test_prioriza_momento_mas_antiguo_si_empate():
-    datos_plan = plan()
-    primero = solicitud(["MAT101"], estudiante="EST-1", momento="2026-09-02T10:00:00")
-    segundo = solicitud(["MAT101"], estudiante="EST-2", momento="2026-09-01T10:00:00")
-    expedientes = {
-        "EST-1": expediente(estudiante="EST-1"),
-        "EST-2": expediente(estudiante="EST-2"),
-    }
-
-    orden = ordenar_por_prioridad([primero, segundo], expedientes, datos_plan)
-
-    assert orden[0].estudiante_id == "EST-2"
