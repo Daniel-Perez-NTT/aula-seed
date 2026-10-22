@@ -22,6 +22,17 @@
       },
       "desbloqueada": false,
       "sellada": "2026-10-08T15:30:23+00:00"
+    },
+    "S2": {
+      "estado": "sellada",
+      "pistas": 0,
+      "intentos": 5,
+      "predicciones": {
+        "aciertos": 4,
+        "total": 5
+      },
+      "desbloqueada": false,
+      "sellada": "2026-10-22T15:22:45+00:00"
     }
   },
   "creado": "2026-10-07T09:43:16+00:00"
