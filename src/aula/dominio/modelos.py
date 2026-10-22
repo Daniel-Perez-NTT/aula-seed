@@ -86,8 +86,14 @@ class Expediente:
                    for r in self.registros_de(codigo))
 
     def ultimo_intento_aprobado(self, codigo: str):
-        """S2: completar este helper si la normativa acordada lo requiere."""
-        raise NotImplementedError("S2: seleccionar registro tras resolver SPEC-002")
+        aprobados = [
+            registro
+            for registro in self.registros_de(codigo)
+            if registro.estado is EstadoRegistro.APROBADA
+        ]
+        if not aprobados:
+            return None
+        return max(aprobados, key=lambda registro: registro.convocatoria)
 
 
 @dataclass
