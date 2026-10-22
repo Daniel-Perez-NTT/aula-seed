@@ -339,3 +339,31 @@ Comando utilizado:
 ```powershell
 .\.venv\Scripts\python.exe -m pytest tests/ --cov=src/aula/dominio --cov-report=term-missing
 ```
+
+### 7.3 Lo que hicimos con las pruebas desde PowerShell
+
+Al principio ejecuté python -m pytest con el Python general del equipo y
+apareció No module named pytest: pytest no estaba instalado en ese Python.
+Después preparé un entorno virtual y ejecuté las herramientas con el Python de
+.venv. Así todas usan el mismo conjunto privado de dependencias.
+
+La primera instalación también falló. PyYAML 6.0.2 intentó compilarse y Windows
+pidió Microsoft Visual C++ 14.0. Como no tenía permisos de administrador, no
+instalé herramientas del sistema; se actualizó PyYAML a una versión con paquete
+precompilado compatible. También se añadió httpx, que necesita el cliente de
+pruebas de FastAPI.
+
+La primera ejecución de la suite mostró 21 fallos NotImplementedError. Eso
+significaba que las pruebas llamaban a funciones que aún eran marcadores
+pendientes del ejercicio. Tras completar el motor y las transiciones, quedó un
+fallo con el límite de créditos. Revisamos el caso para que el límite del plan
+fuera menor que la suma solicitada; así el test comprobaba realmente el
+rechazo que quería comprobar.
+
+Más adelante, la suite completa dio 30 passed y la cobertura de
+src/aula/dominio fue del 92 %. Las pruebas están separadas por tema:
+test_reglas_matricula.py cubre el motor, test_estados_matricula.py los cambios
+de estado y test_api_matricula.py las peticiones HTTP.
+
+La explicación del trabajo de GitHub, las ramas, los Pull Requests y el
+recorrido completo que seguí está en EXPLICACION-PARA-PRINCIPIANTES-PARTE-2.md.
