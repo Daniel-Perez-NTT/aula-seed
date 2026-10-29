@@ -7,3 +7,4 @@ htmlcov/
 .aula/informe_equivalencia.json
 datos/expedientes_sinteticos.json
 .venv/
+evals/dorado*/
