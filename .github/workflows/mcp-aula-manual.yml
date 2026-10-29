@@ -1,0 +1,125 @@
+name: Consultar herramientas MCP de Aula
+
+on:
+  workflow_dispatch:
+    inputs:
+      herramienta:
+        description: Herramienta MCP que quieres ejecutar
+        required: true
+        type: choice
+        options:
+          - listar_specs
+          - obtener_spec
+          - trazabilidad
+          - resultado_tests
+          - version_plan
+
+      spec_id:
+        description: Identificador para obtener_spec o trazabilidad
+        required: false
+        default: SPEC-002
+        type: string
+
+      codigo_plan:
+        description: Código para version_plan
+        required: false
+        default: PLAN-2024
+        type: string
+
+      ruta_tests:
+        description: Ruta bajo tests/ para resultado_tests
+        required: false
+        default: tests/test_estructura.py
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  consultar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Obtener el código del repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: python -m pip install -r requirements.txt
+
+      - name: Ejecutar la herramienta MCP seleccionada
+        env:
+          HERRAMIENTA: ${{ inputs.herramienta }}
+          SPEC_ID: ${{ inputs.spec_id }}
+          CODIGO_PLAN: ${{ inputs.codigo_plan }}
+          RUTA_TESTS: ${{ inputs.ruta_tests }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          from agentes.mcp_aula.servidor import manejar
+
+          nombre = os.environ["HERRAMIENTA"]
+
+          argumentos_por_herramienta = {
+              "listar_specs": {},
+              "obtener_spec": {
+                  "id": os.environ["SPEC_ID"],
+              },
+              "trazabilidad": {
+                  "spec_id": os.environ["SPEC_ID"],
+              },
+              "resultado_tests": {
+                  "ruta": os.environ["RUTA_TESTS"],
+              },
+              "version_plan": {
+                  "codigo": os.environ["CODIGO_PLAN"],
+              },
+          }
+
+          if nombre not in argumentos_por_herramienta:
+              print(f"Herramienta no permitida: {nombre}")
+              sys.exit(1)
+
+          descubrimiento = manejar({
+              "jsonrpc": "2.0",
+              "id": 1,
+              "method": "tools/list",
+              "params": {},
+          })
+
+          disponibles = {
+              herramienta["name"]
+              for herramienta in descubrimiento["result"]["tools"]
+          }
+
+          if nombre not in disponibles:
+              print(f"El servidor no expone la herramienta {nombre}")
+              sys.exit(1)
+
+          respuesta = manejar({
+              "jsonrpc": "2.0",
+              "id": 2,
+              "method": "tools/call",
+              "params": {
+                  "name": nombre,
+                  "arguments": argumentos_por_herramienta[nombre],
+              },
+          })
+
+          if "error" in respuesta:
+              print(json.dumps(respuesta["error"], indent=2, ensure_ascii=False))
+              sys.exit(1)
+
+          resultado = respuesta["result"]
+          print(f"Herramienta ejecutada: {nombre}")
+          print(resultado["content"][0]["text"])
+
+          if resultado.get("isError"):
+              sys.exit(1)
+          PY
