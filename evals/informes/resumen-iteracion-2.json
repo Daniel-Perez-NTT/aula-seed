@@ -1,0 +1,17 @@
+{
+  "fecha": "2026-10-29",
+  "iteracion": "iteracion-2",
+  "casos": 15,
+  "matriz": {
+    "vp": 10,
+    "fp": 0,
+    "vn": 5,
+    "fn": 0
+  },
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "latencia_media_ms": 1.8,
+  "juez": "offline",
+  "detalle_caso_a_caso_omitido": true
+}
