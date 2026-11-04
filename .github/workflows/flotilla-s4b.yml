@@ -1,0 +1,194 @@
+name: S4B - Pipeline de la flotilla
+
+on:
+  pull_request:
+    paths:
+      - "agentes/flotilla/**"
+      - "agentes/mcp_aula/**"
+      - "agentes/conformidad/**"
+      - "herramientas/**"
+      - "labs/S4b-flotilla/**"
+      - "src/aula/legado/**"
+      - "tests/**"
+      - "requirements.txt"
+      - ".github/workflows/flotilla-s4b.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  triaje:
+    name: Agente de triaje - pruebas
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: python -m pip install -r requirements.txt
+
+      - name: Ejecutar las pruebas y guardar el resultado
+        run: python -m pytest tests/ --junitxml=triaje-resultados.xml
+
+      - name: Publicar evidencia de triaje
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-triaje
+          path: triaje-resultados.xml
+          if-no-files-found: ignore
+
+  modernizacion:
+    name: Agente de modernizacion - inventario de solo lectura
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias MCP
+        run: python -m pip install -r requirements.txt
+
+      - name: Crear inventario factual del legado
+        run: |
+          python - <<'PY'
+          import ast
+          import hashlib
+          import json
+          from pathlib import Path
+          from agentes.mcp_aula.servidor import manejar
+
+          def llamar_mcp(nombre, argumentos):
+              respuesta = manejar({
+                  "jsonrpc": "2.0",
+                  "id": 1,
+                  "method": "tools/call",
+                  "params": {"name": nombre, "arguments": argumentos},
+              })
+              if "error" in respuesta:
+                  raise SystemExit(f"Fallo al llamar {nombre}: {respuesta['error']}")
+              resultado = respuesta["result"]
+              if resultado.get("isError"):
+                  raise SystemExit(f"Fallo al llamar {nombre}: {resultado}")
+              return json.loads(resultado["content"][0]["text"])
+
+          ruta = Path("src/aula/legado/calculadora_expediente_v1.py")
+          contenido = ruta.read_bytes()
+          arbol = ast.parse(contenido.decode("utf-8"), filename=str(ruta))
+          spec = llamar_mcp("obtener_spec", {"id": "SPEC-002"})
+          plan = llamar_mcp("version_plan", {"codigo": "PLAN-2024"})
+          funciones = [
+              nodo.name for nodo in arbol.body
+              if isinstance(nodo, (ast.FunctionDef, ast.AsyncFunctionDef))
+          ]
+          clases = [
+              nodo.name for nodo in arbol.body
+              if isinstance(nodo, ast.ClassDef)
+          ]
+
+          informe = [
+              "# Inventario automatico del modulo legado",
+              "",
+              "Este informe contiene datos estaticos para orientar al agente de modernizacion.",
+              "No evalua reglas de negocio ni modifica el modulo.",
+              "",
+              f"- Ruta: `{ruta.as_posix()}`",
+              f"- SHA-256: `{hashlib.sha256(contenido).hexdigest()}`",
+              f"- Lineas: {len(contenido.decode('utf-8').splitlines())}",
+              f"- Funciones: {', '.join(funciones) or 'ninguna'}",
+              f"- Clases: {', '.join(clases) or 'ninguna'}",
+              f"- Spec consultada por MCP: {spec.get('id', 'no encontrada')}",
+              f"- Criterios de la spec: {', '.join(spec.get('criterios', []))}",
+              f"- Plan consultado por MCP: {plan.get('codigo', 'no encontrado')}",
+          ]
+
+          salida = Path("modernizacion-inventario.md")
+          salida.write_text("\n".join(informe) + "\n", encoding="utf-8")
+          print(salida.read_text(encoding="utf-8"))
+          PY
+
+      - name: Publicar evidencia de modernizacion
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-modernizacion
+          path: modernizacion-inventario.md
+
+  conformidad:
+    name: Agente de conformidad - contrato y MCP
+    needs:
+      - triaje
+      - modernizacion
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: python -m pip install -r requirements.txt
+
+      - name: Validar el contrato de los tres agentes
+        run: python -m agentes.flotilla.validar_contrato
+
+      - name: Confirmar que existen los tres prompts
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          prompts = {
+              "conformidad": Path("agentes/flotilla/prompts/conformidad.md"),
+              "triaje": Path("agentes/flotilla/prompts/triaje.md"),
+              "modernizacion": Path("agentes/flotilla/prompts/modernizacion.md"),
+          }
+
+          faltan = [nombre for nombre, ruta in prompts.items() if not ruta.is_file()]
+          if faltan:
+              raise SystemExit(f"Faltan prompts: {', '.join(faltan)}")
+
+          for nombre, ruta in prompts.items():
+              print(f"OK: {nombre} -> {ruta.as_posix()}")
+          PY
+
+      - name: Descargar evidencia de triaje
+        uses: actions/download-artifact@v4
+        with:
+          name: evidencia-triaje
+          path: evidencias/triaje
+
+      - name: Descargar evidencia de modernizacion
+        uses: actions/download-artifact@v4
+        with:
+          name: evidencia-modernizacion
+          path: evidencias/modernizacion
+
+      - name: Resumir las evidencias recibidas
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          rutas = [
+              Path("evidencias/triaje/triaje-resultados.xml"),
+              Path("evidencias/modernizacion/modernizacion-inventario.md"),
+          ]
+          for ruta in rutas:
+              if not ruta.is_file():
+                  raise SystemExit(f"No se recibió la evidencia esperada: {ruta}")
+              print(f"Evidencia recibida: {ruta.as_posix()} ({ruta.stat().st_size} bytes)")
+          PY

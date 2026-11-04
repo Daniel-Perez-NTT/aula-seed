@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "aula": {
+      "command": "python",
+      "args": [
+        "-m",
+        "agentes.mcp_aula.servidor"
+      ]
+    },
+    "flotilla": {
+      "command": "python",
+      "args": [
+        "-m",
+        "agentes.flotilla.servidor"
+      ]
+    }
+  }
+}

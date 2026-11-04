@@ -11,6 +11,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 
 
 def metadatos(cuerpo: str) -> tuple[str, list[str]]:
+    cuerpo = cuerpo.removeprefix("\ufeff")
     spec = re.search(r"^AULA_SPEC_ID:\s*(SPEC-\d+)$", cuerpo, re.M)
     criterios = re.search(r"^AULA_CRITERIOS:\s*(.+)$", cuerpo, re.M)
     if not spec or not criterios:
@@ -19,6 +20,11 @@ def metadatos(cuerpo: str) -> tuple[str, list[str]]:
     if not valores:
         raise ValueError("AULA_CRITERIOS debe declarar al menos un criterio")
     return spec.group(1), valores
+
+
+def leer_cuerpo(ruta: Path) -> str:
+    """Lee un cuerpo de PR con o sin la marca BOM habitual de Windows."""
+    return ruta.read_text(encoding="utf-8-sig")
 
 
 def archivos(base: str) -> list[dict]:
@@ -40,7 +46,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--salida", default=".conformidad-pr.json")
     args = parser.parse_args(argv)
     try:
-        spec, criterios = metadatos(Path(args.cuerpo).read_text(encoding="utf-8"))
+        spec, criterios = metadatos(leer_cuerpo(Path(args.cuerpo)))
     except (OSError, ValueError) as exc:
         print(f"ERROR: {exc}")
         return 2
