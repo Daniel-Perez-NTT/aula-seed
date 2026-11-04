@@ -117,6 +117,17 @@ def _destinatarios_permitidos(emisor: str) -> set[str]:
     return set()
 
 
+def _tipos_handoff_permitidos(emisor: str, destinatario: str) -> set[str]:
+    ruta = RAIZ / "agentes" / "flotilla" / "contrato.json"
+    contrato = json.loads(ruta.read_text(encoding="utf-8"))
+    return {
+        str(handoff.get("tipo", ""))
+        for handoff in contrato.get("handoffs", [])
+        if handoff.get("desde") == emisor
+        and handoff.get("hacia") == destinatario
+    }
+
+
 def publicar_mensaje(argumentos: dict) -> dict:
     run_id = str(argumentos.get("run_id", "")).strip()
     emisor = str(argumentos.get("de", "")).strip()
@@ -137,6 +148,11 @@ def publicar_mensaje(argumentos: dict) -> dict:
         )
     if not tipo:
         raise ValueError("tipo es obligatorio")
+    if tipo not in _tipos_handoff_permitidos(emisor, destinatario):
+        raise ValueError(
+            f"el handoff {emisor} -> {destinatario} de tipo {tipo!r} "
+            "no está declarado en el contrato"
+        )
     if not re.fullmatch(r"[0-9a-f]{7,40}", commit_id):
         raise ValueError("commit debe ser un SHA de Git de 7 a 40 caracteres")
     if not isinstance(payload, dict):

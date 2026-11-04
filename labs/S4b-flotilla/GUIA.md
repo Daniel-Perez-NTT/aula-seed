@@ -29,6 +29,11 @@ cliente el primer dia.
 
 Diagrama de flotilla, contrato de contexto en formato validable y grabacion de un ciclo completo.
 
+Al abrir o actualizar un pull request con cambios de S4B, el workflow de la
+flotilla publica o actualiza un comentario con el resultado de sus tres jobs y
+un enlace a las evidencias. Ese comentario informa de las comprobaciones
+automaticas; la revision y decision final siguen siendo humanas.
+
 ## Como se cierra
 
 ```bash
