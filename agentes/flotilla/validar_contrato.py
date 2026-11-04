@@ -7,7 +7,8 @@ from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from agentes.mcp_aula.servidor import HERRAMIENTAS
+from agentes.mcp_aula.servidor import HERRAMIENTAS as HERRAMIENTAS_AULA
+from agentes.flotilla.servidor import HERRAMIENTAS_MENSAJERIA
 
 
 RAIZ = Path(__file__).resolve().parents[2]
@@ -51,7 +52,10 @@ def validar() -> list[str]:
             "agentes: se esperan exactamente conformidad, triaje y modernizacion"
         )
 
-    nombres_mcp = {herramienta["name"] for herramienta in HERRAMIENTAS}
+    nombres_mcp = {
+        herramienta["name"]
+        for herramienta in HERRAMIENTAS_AULA + HERRAMIENTAS_MENSAJERIA
+    }
 
     for agente in agentes:
         identificador = agente.get("id", "<sin-id>")
@@ -59,7 +63,7 @@ def validar() -> list[str]:
             if herramienta not in nombres_mcp:
                 errores.append(
                     f"agentes.{identificador}.herramientas_mcp: "
-                    f"{herramienta!r} no existe en el servidor MCP de Aula"
+                    f"{herramienta!r} no existe en los servidores MCP disponibles"
                 )
 
     destinos_validos = ROLES_ESPERADOS | {"responsable_humano"}
@@ -80,6 +84,18 @@ def validar() -> list[str]:
             errores.append(f"handoffs: emisor desconocido {desde!r}")
         if hacia not in destinos_validos:
             errores.append(f"handoffs: destinatario desconocido {hacia!r}")
+        else:
+            emisor_contrato = next(
+                (agente for agente in agentes if agente.get("id") == desde),
+                None,
+            )
+            if (
+                emisor_contrato is not None
+                and hacia not in emisor_contrato.get("destinatarios_permitidos", [])
+            ):
+                errores.append(
+                    f"handoffs: {desde!r} no tiene permitido enviar a {hacia!r}"
+                )
 
     return errores
 

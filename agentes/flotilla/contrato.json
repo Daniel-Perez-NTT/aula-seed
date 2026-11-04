@@ -23,7 +23,10 @@
       ],
       "herramientas_mcp": [
         "obtener_spec",
-        "trazabilidad"
+        "trazabilidad",
+        "publicar_mensaje",
+        "leer_bandeja",
+        "confirmar_mensaje"
       ],
       "salida": {
         "formato": "json",
@@ -51,7 +54,10 @@
         "ruta de los tests relevantes"
       ],
       "herramientas_mcp": [
-        "resultado_tests"
+        "resultado_tests",
+        "publicar_mensaje",
+        "leer_bandeja",
+        "confirmar_mensaje"
       ],
       "salida": {
         "formato": "json",
@@ -82,7 +88,10 @@
       ],
       "herramientas_mcp": [
         "obtener_spec",
-        "version_plan"
+        "version_plan",
+        "publicar_mensaje",
+        "leer_bandeja",
+        "confirmar_mensaje"
       ],
       "salida": {
         "formato": "markdown",
@@ -124,6 +133,7 @@
       "El destinatario consulta su bandeja mediante leer_bandeja y confirma cada mensaje procesado mediante confirmar_mensaje.",
       "El destinatario usa payload como entrada y publica su respuesta mediante el mismo servidor MCP.",
       "Los mensajes persisten en la base SQLite y pueden conservarse como evidencia del ciclo.",
+      "El servidor solo acepta tipos de mensaje declarados para esa pareja de emisor y destinatario en handoffs.",
       "Una salida de agente no integra cambios automáticamente; la decisión final corresponde a una persona."
     ]
   },
@@ -141,6 +151,12 @@
       "entrega": "tests afectados y comportamiento que no se pudo reproducir"
     },
     {
+      "desde": "triaje",
+      "hacia": "responsable_humano",
+      "tipo": "diagnostico_ci",
+      "entrega": "resumen de fallo, evidencia reunida y resultado de reproduccion"
+    },
+    {
       "desde": "conformidad",
       "hacia": "modernizacion",
       "tipo": "rutas_y_riesgos_relevantes",
@@ -151,6 +167,12 @@
       "hacia": "conformidad",
       "tipo": "riesgos_del_legado",
       "entrega": "comportamientos heredados que deben tenerse en cuenta al revisar el cambio"
+    },
+    {
+      "desde": "modernizacion",
+      "hacia": "triaje",
+      "tipo": "contexto_de_fallo",
+      "entrega": "observaciones del legado que ayuden a interpretar el fallo reproducido"
     },
     {
       "desde": "conformidad",
