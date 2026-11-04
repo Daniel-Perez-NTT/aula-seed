@@ -1,0 +1,184 @@
+{
+  "version": 1,
+  "nombre": "flotilla-aula-s4b",
+  "contexto": {
+    "servidor_mcp": "aula-contexto",
+    "transporte": "stdio",
+    "comando": "python",
+    "argumentos": [
+      "-m",
+      "agentes.mcp_aula.servidor"
+    ],
+    "base_de_trabajo": "los tres agentes parten del mismo commit y trabajan en worktrees separados"
+  },
+  "agentes": [
+    {
+      "id": "conformidad",
+      "objetivo": "Revisar un PR frente a su especificación y comunicar hallazgos a los otros agentes.",
+      "entradas": [
+        "identificador del PR",
+        "identificador de la spec",
+        "diff del PR",
+        "mensajes recibidos de triaje y modernizacion"
+      ],
+      "herramientas_mcp": [
+        "obtener_spec",
+        "trazabilidad"
+      ],
+      "salida": {
+        "formato": "json",
+        "archivo": "agentes/flotilla/evidencias/conformidad.json",
+        "campos": [
+          "veredicto",
+          "criterios_sin_cubrir",
+          "fuera_de_alcance",
+          "hallazgos"
+        ]
+      },
+      "destinatarios_permitidos": [
+        "triaje",
+        "modernizacion",
+        "responsable_humano"
+      ],
+      "escritura": "Solo escribe su archivo de evidencia."
+    },
+    {
+      "id": "triaje",
+      "objetivo": "Investigar un fallo de CI, intentar reproducirlo y comunicar la evidencia.",
+      "entradas": [
+        "identificador del PR o commit",
+        "log de CI proporcionado por una persona",
+        "ruta de los tests relevantes"
+      ],
+      "herramientas_mcp": [
+        "resultado_tests"
+      ],
+      "salida": {
+        "formato": "json",
+        "archivo": "agentes/flotilla/evidencias/triaje.json",
+        "campos": [
+          "fallo_observado",
+          "evidencia",
+          "resultado_de_reproduccion",
+          "causa_probable",
+          "siguiente_paso"
+        ]
+      },
+      "destinatarios_permitidos": [
+        "conformidad",
+        "modernizacion",
+        "responsable_humano"
+      ],
+      "escritura": "Solo escribe su archivo de evidencia."
+    },
+    {
+      "id": "modernizacion",
+      "objetivo": "Analizar el legado y comunicar riesgos y propuestas para la estación S5.",
+      "entradas": [
+        "ruta src/aula/legado/calculadora_expediente_v1.py",
+        "spec SPEC-002",
+        "plan PLAN-2024",
+        "mensajes recibidos de conformidad y triaje"
+      ],
+      "herramientas_mcp": [
+        "obtener_spec",
+        "version_plan"
+      ],
+      "salida": {
+        "formato": "markdown",
+        "archivo": "agentes/flotilla/evidencias/modernizacion.md",
+        "secciones": [
+          "comportamiento observado",
+          "riesgos",
+          "preguntas por caracterizar en S5",
+          "propuesta"
+        ]
+      },
+      "destinatarios_permitidos": [
+        "conformidad",
+        "triaje",
+        "responsable_humano"
+      ],
+      "restricciones": [
+        "En S4B solo se lee src/aula/legado/.",
+        "No se refactoriza el legado antes de caracterizarlo en S5."
+      ],
+      "escritura": "Solo escribe su archivo de evidencia."
+    }
+  ],
+  "comunicacion": {
+    "mecanismo": "SQLite compartido mediante las herramientas MCP Flotilla",
+    "nota": "El servidor MCP Flotilla persiste los mensajes en una base SQLite compartida por las sesiones. El destinatario lee su bandeja y confirma cada mensaje procesado.",
+    "formato_mensaje": {
+      "run_id": "identificador comun del ciclo",
+      "de": "id del agente emisor",
+      "para": "id del agente receptor o responsable_humano",
+      "tipo": "nombre del tipo de mensaje",
+      "commit": "commit analizado",
+      "payload": "datos y evidencia producidos por el emisor"
+    },
+    "reglas": [
+      "Los tres agentes reciben el mismo run_id y analizan el mismo commit base.",
+      "El emisor publica un mensaje JSON mediante la herramienta MCP publicar_mensaje.",
+      "El servidor guarda el mensaje en SQLite para el destinatario indicado en para.",
+      "El destinatario consulta su bandeja mediante leer_bandeja y confirma cada mensaje procesado mediante confirmar_mensaje.",
+      "El destinatario usa payload como entrada y publica su respuesta mediante el mismo servidor MCP.",
+      "Los mensajes persisten en la base SQLite y pueden conservarse como evidencia del ciclo.",
+      "Una salida de agente no integra cambios automáticamente; la decisión final corresponde a una persona."
+    ]
+  },
+  "handoffs": [
+    {
+      "desde": "triaje",
+      "hacia": "conformidad",
+      "tipo": "diagnostico_ci",
+      "entrega": "fallo observado, log relevante y resultado de reproduccion"
+    },
+    {
+      "desde": "triaje",
+      "hacia": "modernizacion",
+      "tipo": "contexto_de_fallo",
+      "entrega": "tests afectados y comportamiento que no se pudo reproducir"
+    },
+    {
+      "desde": "conformidad",
+      "hacia": "modernizacion",
+      "tipo": "rutas_y_riesgos_relevantes",
+      "entrega": "archivos del PR y hallazgos que puedan relacionarse con el legado"
+    },
+    {
+      "desde": "modernizacion",
+      "hacia": "conformidad",
+      "tipo": "riesgos_del_legado",
+      "entrega": "comportamientos heredados que deben tenerse en cuenta al revisar el cambio"
+    },
+    {
+      "desde": "conformidad",
+      "hacia": "triaje",
+      "tipo": "veredicto_final",
+      "entrega": "criterios sin cubrir, cambios fuera de alcance y hallazgos"
+    },
+    {
+      "desde": "conformidad",
+      "hacia": "responsable_humano",
+      "tipo": "veredicto",
+      "entrega": "veredicto y hallazgos del PR"
+    },
+    {
+      "desde": "modernizacion",
+      "hacia": "responsable_humano",
+      "tipo": "propuesta_s5",
+      "entrega": "análisis de riesgos y propuesta para S5"
+    }
+  ],
+  "conflictos": {
+    "quien_decide": "responsable_humano",
+    "regla": "Si varios agentes proponen cambios sobre la misma ruta, ninguno integra su propuesta automáticamente. Una persona compara las propuestas y decide qué integrar.",
+    "rutas_protegidas": [
+      ".github/workflows/",
+      "manifiestos/",
+      "labs/*/verificar.py",
+      "src/aula/legado/"
+    ]
+  }
+}

@@ -5,6 +5,9 @@ __pycache__/
 htmlcov/
 .aula/auditoria.jsonl
 .aula/informe_equivalencia.json
+.aula/flotilla.sqlite3
 datos/expedientes_sinteticos.json
 .venv/
 evals/dorado*/
+.conformidad-pr.json
+.pytest-tmp-s4b/

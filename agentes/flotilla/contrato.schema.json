@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aula.local/schemas/contrato-flotilla.schema.json",
+  "title": "Contrato de la flotilla de Aula",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "nombre",
+    "contexto",
+    "agentes",
+    "comunicacion",
+    "handoffs",
+    "conflictos"
+  ],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "nombre": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contexto": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "servidor_mcp",
+        "transporte",
+        "comando",
+        "argumentos",
+        "base_de_trabajo"
+      ],
+      "properties": {
+        "servidor_mcp": {
+          "type": "string"
+        },
+        "transporte": {
+          "const": "stdio"
+        },
+        "comando": {
+          "type": "string"
+        },
+        "argumentos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "base_de_trabajo": {
+          "type": "string"
+        }
+      }
+    },
+    "agentes": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {
+        "$ref": "#/$defs/agente"
+      }
+    },
+    "comunicacion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mecanismo",
+        "nota",
+        "formato_mensaje",
+        "reglas"
+      ],
+      "properties": {
+        "mecanismo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nota": {
+          "type": "string",
+          "minLength": 1
+        },
+        "formato_mensaje": {
+          "type": "object",
+          "required": [
+            "run_id",
+            "de",
+            "para",
+            "tipo",
+            "commit",
+            "payload"
+          ],
+          "properties": {
+            "run_id": {
+              "type": "string"
+            },
+            "de": {
+              "type": "string"
+            },
+            "para": {
+              "type": "string"
+            },
+            "tipo": {
+              "type": "string"
+            },
+            "commit": {
+              "type": "string"
+            },
+            "payload": {}
+          }
+        },
+        "reglas": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "handoffs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "desde",
+          "hacia",
+          "tipo",
+          "entrega"
+        ],
+        "properties": {
+          "desde": {
+            "type": "string"
+          },
+          "hacia": {
+            "type": "string"
+          },
+          "tipo": {
+            "type": "string"
+          },
+          "entrega": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "conflictos": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "quien_decide",
+        "regla",
+        "rutas_protegidas"
+      ],
+      "properties": {
+        "quien_decide": {
+          "type": "string"
+        },
+        "regla": {
+          "type": "string"
+        },
+        "rutas_protegidas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "agente": {
+      "type": "object",
+      "required": [
+        "id",
+        "objetivo",
+        "entradas",
+        "herramientas_mcp",
+        "salida",
+        "destinatarios_permitidos",
+        "escritura"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "conformidad",
+            "triaje",
+            "modernizacion"
+          ]
+        },
+        "objetivo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entradas": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "herramientas_mcp": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "salida": {
+          "type": "object",
+          "required": [
+            "formato",
+            "archivo"
+          ],
+          "properties": {
+            "formato": {
+              "type": "string"
+            },
+            "archivo": {
+              "type": "string"
+            },
+            "campos": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "secciones": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "destinatarios_permitidos": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "conformidad",
+              "triaje",
+              "modernizacion",
+              "responsable_humano"
+            ]
+          }
+        },
+        "restricciones": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "escritura": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
