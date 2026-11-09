@@ -80,9 +80,7 @@ def media(expediente, mapa):
         if creditos == 0:
             continue
 
-        es_convalidada = hay_convalidacion(registros, codigo)
-
-        if es_convalidada:
+        if hay_convalidacion(registros, codigo):
             nota = NOTA_CONVALIDADA
         else:
             aprobada = ultima_aprobada(registros, codigo)
@@ -90,11 +88,10 @@ def media(expediente, mapa):
             if aprobada is None or aprobada.get("nota") is None:
                 continue
 
-            nota = round(float(aprobada["nota"]), DECIMALES)
+            nota = float(aprobada["nota"])
 
         numerador += nota * creditos
-        if not es_convalidada:
-            denominador += creditos
+        denominador += creditos
         codigos_vistos.add(codigo)
 
     if denominador == 0:
