@@ -96,33 +96,32 @@ def test_media_ignora_asignaturas_desconocidas_y_notas_ausentes():
     assert calc.media(datos, MAPA) == 0.0
 
 
-def test_media_sin_creditos_en_el_denominador_es_cero():
+def test_media_solo_con_convalidacion_es_cinco():
     datos = expediente(registro("MAT101", "convalidada"))
 
-    assert calc.media(datos, MAPA) == 0.0
+    assert calc.media(datos, MAPA) == 5.0
 
 
-def test_no_documentado_1_convalidada_aporta_al_numerador_no_al_denominador():
+def test_no_documentado_1_convalidada_cuenta_en_numerador_y_denominador():
     datos = expediente(
         registro("MAT101", "convalidada"),
         registro("PRG101", "aprobada", nota=8),
     )
 
-    # MAT101 aporta 5 * 6 = 30 al numerador, pero sus créditos no
-    # entran en el denominador. Resultado: (30 + 8 * 9) / 9 = 11.33.
-    assert calc.media(datos, MAPA) == 11.33
+    # La convalidada aporta una nota 5 y sus 6 créditos cuentan
+    # también en el divisor: (5 * 6 + 8 * 9) / (6 + 9) = 6.8.
+    assert calc.media(datos, MAPA) == 6.8
 
 
-def test_no_documentado_2_redondea_cada_nota_antes_de_promediar():
+def test_no_documentado_2_redondea_al_final_la_media():
     datos = expediente(
         registro("MAT101", "aprobada", nota=1.0),
         registro("FIS101", "aprobada", nota=1.007),
     )
 
-    # El legado redondea las notas a 1.00 y 1.01 antes de promediarlas,
-    # por eso obtiene 1.01. Si promediara las notas originales primero,
-    # obtendría 1.00.
-    assert calc.media(datos, MAPA) == 1.01
+    # Primero se calcula la media con las notas originales:
+    # (1.0 + 1.007) / 2 = 1.0035. Al final se redondea a 1.00.
+    assert calc.media(datos, MAPA) == 1.0
 
 
 def test_creditos_superados_cuenta_una_sola_vez_por_asignatura():
