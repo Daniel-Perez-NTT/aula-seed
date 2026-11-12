@@ -1,0 +1,1 @@
+{"estudiante_id": "EST-0001", "curso_academico": "2026-2027", "plan": "PLAN-2024", "version_plan": "1.2.0", "momento": "2026-09-10T10:00:00", "resultado": {"estado": "validada", "lineas": [{"codigo": "MAT101", "admitida": false, "en_espera": true, "motivo": null}]}}

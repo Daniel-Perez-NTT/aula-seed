@@ -66,6 +66,28 @@
       },
       "desbloqueada": false,
       "sellada": null
+    },
+    "S5": {
+      "estado": "sellada",
+      "pistas": 0,
+      "intentos": 1,
+      "predicciones": {
+        "aciertos": 1,
+        "total": 1
+      },
+      "desbloqueada": false,
+      "sellada": "2026-11-09T13:41:51+00:00"
+    },
+    "S6": {
+      "estado": "superable",
+      "pistas": 0,
+      "intentos": 4,
+      "predicciones": {
+        "aciertos": 4,
+        "total": 4
+      },
+      "desbloqueada": false,
+      "sellada": null
     }
   },
   "creado": "2026-10-07T09:43:16+00:00"
