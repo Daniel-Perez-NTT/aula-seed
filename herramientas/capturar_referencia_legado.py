@@ -4,6 +4,7 @@ Debe ejecutarse antes de modificar la calculadora heredada.
 """
 
 import hashlib
+import gzip
 import json
 import subprocess
 import sys
@@ -12,9 +13,10 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parents[1]
 COMMIT_CARACTERIZACION = "e6068adf65180b556181fdfeeb903174438ebeb8"
 ARCHIVO_LEGADO = "src/aula/legado/calculadora_expediente_v1.py"
+HUELLA_LEGADO_ORIGINAL = "343eebf51fc64155d95dbe048a93a1e739822d9f"
 ARCHIVO_CORPUS = RAIZ / "datos/expedientes_sinteticos.json"
 ARCHIVO_PLAN = RAIZ / "datos/planes/PLAN-2024.json"
-ARCHIVO_SALIDA = RAIZ / "tests/fixtures/legado_corpus_referencia.json"
+ARCHIVO_SALIDA = RAIZ / "tests/fixtures/legado_corpus_referencia.json.gz"
 
 sys.path.insert(0, str(RAIZ / "src"))
 
@@ -32,15 +34,17 @@ def ejecutar_git(*argumentos):
 
 
 def main():
-    # Evita capturar como “original” una calculadora que ya se haya modificado
-    # desde el commit de caracterización.
-    diferencias = subprocess.run(
-        ["git", "diff", "--quiet", COMMIT_CARACTERIZACION, "--", ARCHIVO_LEGADO],
+    # Evita capturar como referencia una calculadora que ya se haya modificado.
+    blob_actual = subprocess.run(
+        ["git", "hash-object", ARCHIVO_LEGADO],
         cwd=RAIZ,
+        check=True,
+        capture_output=True,
+        text=True,
     )
-    if diferencias.returncode != 0:
+    if blob_actual.stdout.strip() != HUELLA_LEGADO_ORIGINAL:
         raise SystemExit(
-            "La calculadora no coincide con la del commit de caracterización. "
+            "La calculadora no coincide con la versión original caracterizada. "
             "No se ha generado la referencia."
         )
 
@@ -69,10 +73,14 @@ def main():
         "resultados": resultados,
     }
 
+    referencia_json = json.dumps(
+        referencia,
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
     ARCHIVO_SALIDA.parent.mkdir(parents=True, exist_ok=True)
-    ARCHIVO_SALIDA.write_text(
-        json.dumps(referencia, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
+    ARCHIVO_SALIDA.write_bytes(
+        gzip.compress(referencia_json.encode("utf-8"), mtime=0)
     )
 
     print(f"Referencia creada: {ARCHIVO_SALIDA.relative_to(RAIZ)}")

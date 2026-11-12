@@ -1,0 +1,32 @@
+agente: triaje
+version: "1.0.0"
+propietario_humano: "responsable-de-triaje"
+nivel_autonomia: N2
+
+herramientas:
+  - resultado_tests
+  - listar_specs
+  - obtener_spec
+  - publicar_mensaje
+  - leer_bandeja
+  - confirmar_mensaje
+
+evaluacion:
+  fecha: 2026-11-11
+  caducidad_dias: 30
+  informe: "evals/informes/evaluacion-20261029-145857.json"
+
+coste:
+  moneda: USD
+  tokens_por_ejecucion: 0
+  coste_por_ejecucion: 0.0
+  metodo: "ejecucion local y determinista"
+
+reversion:
+  procedimiento: "detener el agente de triaje y volver a la versión anterior"
+  responsable: "responsable-de-triaje"
+  tiempo_objetivo_minutos: 15
+
+codigo:
+  ruta: "agentes/flotilla/prompts/triaje.md"
+  hash_sha256: "f8209d45b1b1630368767ee11521a985754768739f0f8c5c1bfe5e888db6288a"

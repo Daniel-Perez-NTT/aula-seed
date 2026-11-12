@@ -1,7 +1,7 @@
 # Desviaciones respecto al legado
 
 La referencia para estas comparaciones es la calculadora original, capturada
-antes de la refactorización en `tests/fixtures/legado_corpus_referencia.json`.
+antes de la refactorización en `tests/fixtures/legado_corpus_referencia.json.gz`.
 Las siguientes diferencias son cambios deliberados en la regla de cálculo.
 
 ## D-01: Los créditos convalidados cuentan en el divisor

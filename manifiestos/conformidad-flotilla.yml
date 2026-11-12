@@ -1,0 +1,35 @@
+agente: conformidad-flotilla
+version: "1.0.0"
+propietario_humano: "responsable-de-la-flotilla"
+nivel_autonomia: N2
+
+herramientas:
+  - listar_specs
+  - obtener_spec
+  - trazabilidad
+  - resultado_tests
+  - leer_bandeja
+  - publicar_mensaje
+  - confirmar_mensaje
+
+evaluacion:
+  fecha: 2026-11-11
+  caducidad_dias: 30
+  precision: 0.800
+  recall: 0.850
+  informe: "evals/informes/evaluacion-20261029-145857.json"
+
+coste:
+  moneda: USD
+  tokens_por_ejecucion: 0
+  coste_por_ejecucion: 0.0
+  metodo: "ejecucion determinista y mensajeria local"
+
+reversion:
+  procedimiento: "detener el agente y restaurar el contrato anterior de la flotilla"
+  responsable: "responsable-de-la-flotilla"
+  tiempo_objetivo_minutos: 15
+
+codigo:
+  ruta: "agentes/flotilla/servidor.py"
+  hash_sha256: "5ede3ed5a9c2eba5e659368a4a0ae6eea96c88433928581b32d49360a9093a67"

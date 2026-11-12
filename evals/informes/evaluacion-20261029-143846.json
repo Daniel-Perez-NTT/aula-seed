@@ -1,0 +1,108 @@
+{
+  "fecha": "2026-10-29",
+  "casos": 15,
+  "matriz": {
+    "vp": 1,
+    "fp": 0,
+    "vn": 5,
+    "fn": 9
+  },
+  "precision": 1.0,
+  "recall": 0.1,
+  "f1": 0.182,
+  "latencia_media_ms": 0.0,
+  "coste_usd_por_ejecucion": 0.0,
+  "juez": "offline",
+  "detalle": [
+    {
+      "caso": "oro-001",
+      "esperado": "conforme",
+      "obtenido": "conforme",
+      "resultado": "acierto"
+    },
+    {
+      "caso": "oro-002",
+      "esperado": "conforme",
+      "obtenido": "conforme",
+      "resultado": "acierto"
+    },
+    {
+      "caso": "oro-003",
+      "esperado": "conforme",
+      "obtenido": "conforme",
+      "resultado": "acierto"
+    },
+    {
+      "caso": "oro-004",
+      "esperado": "no_conforme_sin_cubrir",
+      "obtenido": "conforme",
+      "resultado": "falso negativo"
+    },
+    {
+      "caso": "oro-005",
+      "esperado": "no_conforme_sin_cubrir",
+      "obtenido": "no_conforme",
+      "resultado": "acierto"
+    },
+    {
+      "caso": "oro-006",
+      "esperado": "no_conforme_sin_cubrir",
+      "obtenido": "conforme",
+      "resultado": "falso negativo"
+    },
+    {
+      "caso": "oro-007",
+      "esperado": "no_conforme_alcance",
+      "obtenido": "conforme",
+      "resultado": "falso negativo"
+    },
+    {
+      "caso": "oro-008",
+      "esperado": "no_conforme_alcance",
+      "obtenido": "conforme",
+      "resultado": "falso negativo"
+    },
+    {
+      "caso": "oro-009",
+      "esperado": "no_conforme_alcance",
+      "obtenido": "conforme",
+      "resultado": "falso negativo"
+    },
+    {
+      "caso": "oro-010",
+      "esperado": "no_conforme_riesgo",
+      "obtenido": "conforme",
+      "resultado": "falso negativo"
+    },
+    {
+      "caso": "oro-011",
+      "esperado": "no_conforme_riesgo",
+      "obtenido": "conforme",
+      "resultado": "falso negativo"
+    },
+    {
+      "caso": "oro-012",
+      "esperado": "no_conforme_riesgo",
+      "obtenido": "conforme",
+      "resultado": "falso negativo"
+    },
+    {
+      "caso": "oro-013",
+      "esperado": "no_conforme_riesgo",
+      "obtenido": "conforme",
+      "resultado": "falso negativo"
+    },
+    {
+      "caso": "oro-014",
+      "esperado": "conforme",
+      "obtenido": "conforme",
+      "resultado": "acierto"
+    },
+    {
+      "caso": "oro-015",
+      "esperado": "conforme_con_observaciones",
+      "obtenido": "conforme",
+      "resultado": "acierto"
+    }
+  ]
+}

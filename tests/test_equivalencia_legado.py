@@ -1,15 +1,16 @@
+import gzip
 import hashlib
 import json
 from pathlib import Path
 
 from aula.legado import calculadora_expediente_v1 as calc
+from herramientas.generar_corpus import generar
 
 
 RAIZ = Path(__file__).resolve().parents[1]
-RUTA_CORPUS = RAIZ / "datos/expedientes_sinteticos.json"
 RUTA_PLAN = RAIZ / "datos/planes/PLAN-2024.json"
 RUTA_REFERENCIA = (
-    RAIZ / "tests/fixtures/legado_corpus_referencia.json"
+    RAIZ / "tests/fixtures/legado_corpus_referencia.json.gz"
 )
 
 
@@ -51,9 +52,9 @@ def media_segun_reglas_nuevas(expediente, mapa):
 
 
 def test_corpus_de_500_coincide_salvo_las_dos_reglas_documentadas():
-    corpus_bytes = RUTA_CORPUS.read_bytes()
-    corpus = json.loads(corpus_bytes)
-    referencia = json.loads(RUTA_REFERENCIA.read_text(encoding="utf-8"))
+    corpus = generar()
+    corpus_bytes = json.dumps(corpus, ensure_ascii=False).encode("utf-8")
+    referencia = json.loads(gzip.decompress(RUTA_REFERENCIA.read_bytes()))
 
     assert len(corpus) == 500
     assert referencia["total_expedientes"] == 500
