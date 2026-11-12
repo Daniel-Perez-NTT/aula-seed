@@ -24,6 +24,13 @@ def fallar(mensaje: str) -> None:
     print(f"ERROR: {mensaje}")
 
 
+def _hash_sha256_canonico(ruta: Path) -> str:
+    """Calcula el hash ignorando diferencias de fin de línea entre sistemas."""
+    texto = ruta.read_text(encoding="utf-8")
+    texto = texto.replace("\r\n", "\n").replace("\r", "\n")
+    return hashlib.sha256(texto.encode("utf-8")).hexdigest()
+
+
 def _cargar_yaml(ruta: Path) -> dict:
     texto = ruta.read_text(encoding="utf-8")
     if yaml is not None:
@@ -61,7 +68,7 @@ def validar(ruta: Path) -> list[str]:
             errores.append(f"{ruta.name}: no existe el codigo declarado: {codigo['ruta']}")
         elif not isinstance(declarado, str) or len(declarado) != 64:
             errores.append(f"{ruta.name}: hash_sha256 debe contener 64 caracteres hexadecimales")
-        elif hashlib.sha256(objetivo.read_bytes()).hexdigest() != declarado:
+        elif _hash_sha256_canonico(objetivo) != declarado:
             errores.append(f"{ruta.name}: hash_sha256 no coincide con {codigo['ruta']}")
 
     evaluacion = datos.get("evaluacion")
