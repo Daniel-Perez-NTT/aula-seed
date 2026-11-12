@@ -1,0 +1,34 @@
+agente: conformidad-spec
+version: "1.0.0"
+propietario_humano: "responsable-de-conformidad"
+nivel_autonomia: N3
+
+herramientas:
+  - listar_specs
+  - obtener_spec
+  - trazabilidad
+  - resultado_tests
+  - version_plan
+
+evaluacion:
+  fecha: 2026-11-11
+  caducidad_dias: 30
+  precision: 0.800
+  recall: 0.850
+  f1: 0.824
+  informe: "evals/informes/evaluacion-20261029-145857.json"
+
+coste:
+  moneda: USD
+  tokens_por_ejecucion: 0
+  coste_por_ejecucion: 0.0
+  metodo: "evaluacion determinista offline"
+
+reversion:
+  procedimiento: "restaurar la version anterior aprobada del agente"
+  responsable: "responsable-de-conformidad"
+  tiempo_objetivo_minutos: 15
+
+codigo:
+  ruta: "agentes/conformidad/agente.py"
+  hash_sha256: "084b9af919808808c94adc1948541ce473c5c160ce7453a832114f0dcd91c2ba"

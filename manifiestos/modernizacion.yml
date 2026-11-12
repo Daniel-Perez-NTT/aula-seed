@@ -1,0 +1,32 @@
+agente: modernizacion
+version: "1.0.0"
+propietario_humano: "responsable-de-modernizacion"
+nivel_autonomia: N1
+
+herramientas:
+  - listar_specs
+  - obtener_spec
+  - version_plan
+  - publicar_mensaje
+  - leer_bandeja
+  - confirmar_mensaje
+
+evaluacion:
+  fecha: 2026-11-11
+  caducidad_dias: 30
+  informe: "evals/informes/evaluacion-20261029-145857.json"
+
+coste:
+  moneda: USD
+  tokens_por_ejecucion: 0
+  coste_por_ejecucion: 0.0
+  metodo: "inventario de solo lectura"
+
+reversion:
+  procedimiento: "descartar el informe generado y conservar el código sin cambios"
+  responsable: "responsable-de-modernizacion"
+  tiempo_objetivo_minutos: 5
+
+codigo:
+  ruta: "agentes/flotilla/prompts/modernizacion.md"
+  hash_sha256: "d0633dd06934a5e84a258c998f9352ae2741ddcad46ac4fd4ff0cb1695c48a8e"
