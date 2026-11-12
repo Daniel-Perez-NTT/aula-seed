@@ -29,4 +29,4 @@ reversion:
 
 codigo:
   ruta: "agentes/flotilla/prompts/modernizacion.md"
-  hash_sha256: "d0633dd06934a5e84a258c998f9352ae2741ddcad46ac4fd4ff0cb1695c48a8e"
+  hash_sha256: "9bb351d1063d199042ead09ee595b3ebf2af7931c2c2e6a49949e4ceb7960993"

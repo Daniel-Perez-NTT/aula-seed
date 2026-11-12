@@ -31,4 +31,4 @@ reversion:
 
 codigo:
   ruta: "agentes/conformidad/agente.py"
-  hash_sha256: "084b9af919808808c94adc1948541ce473c5c160ce7453a832114f0dcd91c2ba"
+  hash_sha256: "b710de5e122d1a707f0ad8e56ce2ec0c15b1f373c0e8c4db0d1e9db543055214"
