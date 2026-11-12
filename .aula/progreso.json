@@ -81,10 +81,10 @@
     "S6": {
       "estado": "superable",
       "pistas": 0,
-      "intentos": 4,
+      "intentos": 5,
       "predicciones": {
-        "aciertos": 4,
-        "total": 4
+        "aciertos": 5,
+        "total": 5
       },
       "desbloqueada": false,
       "sellada": null
