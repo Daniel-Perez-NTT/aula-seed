@@ -156,10 +156,61 @@ jobs:
       - name: Limpiar contenedor
         if: always()
         run: docker rm --force aula-s1
+  despliegue:
+    name: Despliegue en contenedor
+    needs: tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Obtener el código
+        uses: actions/checkout@v4
+
+      - name: Construir imagen de despliegue
+        run: docker build -t aula:s7 .
+
+      - name: Arrancar contenedor de despliegue
+        run: docker run --detach --name aula-s7 --publish 8000:8000 aula:s7
+
+      - name: Comprobar healthcheck
+        shell: bash
+        run: |
+          for intento in {1..10}; do
+            if curl --fail http://127.0.0.1:8000/salud; then
+              echo "Healthcheck correcto"
+              exit 0
+            fi
+
+            echo "La aplicación todavía no responde. Reintentando..."
+            sleep 2
+          done
+
+          echo "El healthcheck ha fallado"
+          docker logs aula-s7
+          exit 1
+
+      - name: Comprobar endpoint de matrículas
+        shell: bash
+        run: |
+          curl --fail \
+            --request POST \
+            --url http://127.0.0.1:8000/matriculas \
+            --header "Content-Type: application/json" \
+            --data '{
+              "estudiante_id": "EST-S7-CI",
+              "curso_academico": "2026-2027",
+              "codigos": ["MAT101"],
+              "momento": "2026-11-13T10:00:00"
+            }'
+
+      - name: Limpiar contenedor
+        if: always()
+        run: docker rm --force aula-s7
 
   publicar:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: tests
+    needs:
+      - tests
+      - despliegue
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -205,3 +256,73 @@ jobs:
         run: |
           IMAGEN="$(printf '%s\n' "$ETIQUETAS" | head -n 1)"
           cosign sign --yes "${IMAGEN}@${DIGEST}"
+
+  despliegue_cloud:
+    name: Despliegue cloud en Render
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: publicar
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Validar configuracion del despliegue
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          AULA_PUBLIC_URL: ${{ secrets.AULA_PUBLIC_URL }}
+        run: |
+          test -n "$RENDER_DEPLOY_HOOK_URL" || {
+            echo "::error::Falta el secreto RENDER_DEPLOY_HOOK_URL"
+            exit 1
+          }
+          test -n "$AULA_PUBLIC_URL" || {
+            echo "::error::Falta el secreto AULA_PUBLIC_URL"
+            exit 1
+          }
+
+      - name: Solicitar despliegue a Render
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            "$RENDER_DEPLOY_HOOK_URL"
+
+      - name: Esperar y comprobar servicio publico
+        env:
+          AULA_PUBLIC_URL: ${{ secrets.AULA_PUBLIC_URL }}
+        shell: bash
+        run: |
+          BASE_URL="${AULA_PUBLIC_URL%/}"
+
+          for intento in {1..30}; do
+            echo "Comprobacion $intento/30 de $BASE_URL/salud"
+            if curl --fail --silent --show-error \
+              --max-time 10 \
+              "$BASE_URL/salud"; then
+              echo
+              echo "Servicio cloud disponible"
+              break
+            fi
+
+            if [ "$intento" -eq 30 ]; then
+              echo "::error::Render no respondio correctamente dentro del tiempo esperado"
+              exit 1
+            fi
+            sleep 10
+          done
+
+      - name: Comprobar POST publico de matriculas
+        env:
+          AULA_PUBLIC_URL: ${{ secrets.AULA_PUBLIC_URL }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --url "${AULA_PUBLIC_URL%/}/matriculas" \
+            --header "Content-Type: application/json" \
+            --data '{
+              "estudiante_id": "EST-S7-CLOUD",
+              "curso_academico": "2026-2027",
+              "codigos": ["MAT101"],
+              "momento": "2026-11-13T10:00:00"
+            }'

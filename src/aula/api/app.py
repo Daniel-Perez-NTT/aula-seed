@@ -4,7 +4,9 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+import logging
+import time
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, field_validator
 
@@ -22,7 +24,46 @@ from ..reglas.motor import (
 from ..reglas.media import resumen_expediente
 from ..reglas.planes import cargar_plan
 
+logger = logging.getLogger("aula.api")
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
+
 app = FastAPI(title="Aula Students", version="1.0.0")
+
+@app.middleware("http")
+async def registrar_peticion(request: Request, call_next):
+    inicio = time.perf_counter()
+
+    logger.info(
+        "peticion_iniciada method=%s path=%s",
+        request.method,
+        request.url.path,
+    )
+
+    try:
+        respuesta = await call_next(request)
+    except Exception:
+        logger.exception(
+            "peticion_fallida method=%s path=%s",
+            request.method,
+            request.url.path,
+        )
+        raise
+
+    duracion_ms = (time.perf_counter() - inicio) * 1000
+
+    logger.info(
+        "peticion_finalizada method=%s path=%s status=%s duracion_ms=%.2f",
+        request.method,
+        request.url.path,
+        respuesta.status_code,
+        duracion_ms,
+    )
+
+    return respuesta
 
 # S1 usa almacenamiento en memoria: se pierde al reiniciar el proceso.
 MATRICULAS = {}
