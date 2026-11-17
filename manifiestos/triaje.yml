@@ -10,6 +10,7 @@ herramientas:
   - publicar_mensaje
   - leer_bandeja
   - confirmar_mensaje
+  - guardar_evidencia_triaje
 
 evaluacion:
   fecha: 2026-11-11

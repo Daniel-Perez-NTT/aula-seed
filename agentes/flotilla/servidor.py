@@ -24,6 +24,22 @@ DESTINATARIOS = ROLES | {"responsable_humano"}
 
 HERRAMIENTAS_MENSAJERIA = [
     {
+        "name": "guardar_evidencia_triaje",
+        "description": (
+            "Guarda la evidencia JSON del agente de triaje en la ruta fija "
+            "agentes/flotilla/evidencias/triaje.json. No acepta rutas arbitrarias."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "run_id": {"type": "string"},
+                "commit": {"type": "string"},
+                "evidencia": {"type": "object"},
+            },
+            "required": ["run_id", "commit", "evidencia"],
+        },
+    },
+    {
         "name": "publicar_mensaje",
         "description": "Envía un mensaje estructurado a otro agente de la flotilla.",
         "inputSchema": {
@@ -252,7 +268,57 @@ def confirmar_mensaje(argumentos: dict) -> dict:
     return {"confirmado": cursor.rowcount == 1, "mensaje_id": mensaje_id}
 
 
+def guardar_evidencia_triaje(argumentos: dict) -> dict:
+    """Guarda únicamente la evidencia del agente de triaje en su ruta fija."""
+    run_id = str(argumentos.get("run_id", "")).strip()
+    commit_id = str(argumentos.get("commit", "")).strip().lower()
+    evidencia = argumentos.get("evidencia")
+
+    if not run_id:
+        raise ValueError("run_id es obligatorio")
+    if not re.fullmatch(r"[0-9a-f]{7,40}", commit_id):
+        raise ValueError("commit debe ser un SHA de Git de 7 a 40 caracteres")
+    if not isinstance(evidencia, dict):
+        raise ValueError("evidencia debe ser un objeto JSON")
+
+    campos_obligatorios = {
+        "fallo_observado",
+        "evidencia",
+        "resultado_de_reproduccion",
+        "causa_probable",
+        "siguiente_paso",
+    }
+    faltan = sorted(campos_obligatorios - set(evidencia))
+    if faltan:
+        raise ValueError(
+            "faltan campos obligatorios en la evidencia: " + ", ".join(faltan)
+        )
+
+    ruta = RAIZ / "agentes" / "flotilla" / "evidencias" / "triaje.json"
+    ruta.parent.mkdir(parents=True, exist_ok=True)
+    documento = {
+        "agente": "triaje",
+        "run_id": run_id,
+        "commit": commit_id,
+        "evidencia": evidencia,
+        "guardado_utc": datetime.now(timezone.utc).isoformat(),
+    }
+    temporal = ruta.with_suffix(".json.tmp")
+    temporal.write_text(
+        json.dumps(documento, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    temporal.replace(ruta)
+    return {
+        "guardado": True,
+        "ruta": ruta.relative_to(RAIZ).as_posix(),
+        "run_id": run_id,
+        "commit": commit_id,
+    }
+
+
 IMPLEMENTACION_MENSAJERIA = {
+    "guardar_evidencia_triaje": guardar_evidencia_triaje,
     "publicar_mensaje": publicar_mensaje,
     "leer_bandeja": leer_bandeja,
     "confirmar_mensaje": confirmar_mensaje,

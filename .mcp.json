@@ -1,18 +1,25 @@
 {
   "mcpServers": {
     "aula": {
-      "command": "python",
+      "command": "C:/DaniNava/ProyectoLaboratorioV2/aula-seed/.venv/Scripts/python.exe",
       "args": [
         "-m",
         "agentes.mcp_aula.servidor"
-      ]
+      ],
+      "env": {
+        "PYTHONPATH": "C:/DaniNava/ProyectoLaboratorioV2/aula-seed"
+      }
     },
     "flotilla": {
-      "command": "python",
+      "command": "C:/DaniNava/ProyectoLaboratorioV2/aula-seed/.venv/Scripts/python.exe",
       "args": [
         "-m",
         "agentes.flotilla.servidor"
-      ]
+      ],
+      "env": {
+        "PYTHONPATH": "C:/DaniNava/ProyectoLaboratorioV2/aula-seed",
+        "AULA_FLOTILLA_DB": "C:/DaniNava/ProyectoLaboratorioV2/aula-seed/.aula/flotilla.sqlite3"
+      }
     }
   }
 }
