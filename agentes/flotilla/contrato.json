@@ -57,7 +57,8 @@
         "resultado_tests",
         "publicar_mensaje",
         "leer_bandeja",
-        "confirmar_mensaje"
+        "confirmar_mensaje",
+        "guardar_evidencia_triaje"
       ],
       "salida": {
         "formato": "json",

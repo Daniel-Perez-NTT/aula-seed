@@ -22,7 +22,11 @@ localmente una ruta dentro de `tests/`.
 5. Publica un mensaje `diagnostico_ci` a `conformidad`.
 6. Publica un mensaje `contexto_de_fallo` a `modernizacion` si el fallo toca
    lógica del expediente o el legado.
-7. Guarda tu salida en `agentes/flotilla/evidencias/triaje.json`.
+7. Guarda tu salida usando la herramienta MCP `guardar_evidencia_triaje`.
+   Pasa `run_id`, el SHA del commit y un objeto `evidencia` con exactamente
+   estos campos: `fallo_observado`, `evidencia`, `resultado_de_reproduccion`,
+   `causa_probable` y `siguiente_paso`. La herramienta escribe en la ruta fija
+   `agentes/flotilla/evidencias/triaje.json`.
 
 ## Formato del mensaje
 
