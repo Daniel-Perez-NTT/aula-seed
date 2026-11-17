@@ -132,7 +132,18 @@ jobs:
           PY
 
       - name: Ejecutar pruebas y cobertura
-        run: python -m pytest tests/ --cov=src/aula/dominio --cov-report=term-missing
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m pytest tests/ --cov=src/aula/dominio --cov-report=term-missing 2>&1 | tee pytest.log
+
+      - name: Guardar log de pytest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-pytest-log
+          path: pytest.log
+          if-no-files-found: ignore
 
       - name: Construir imagen
         run: docker build -t aula:s1 .
@@ -156,6 +167,100 @@ jobs:
       - name: Limpiar contenedor
         if: always()
         run: docker rm --force aula-s1
+
+  comentario_fallo_pr:
+    name: Comentar diagnóstico del fallo en la Pull Request
+    if: ${{ always() && github.event_name == 'pull_request' && needs.tests.result == 'failure' }}
+    needs: tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Descargar log de pytest
+        uses: actions/download-artifact@v4
+        with:
+          name: ci-pytest-log
+        continue-on-error: true
+
+      - name: Publicar o actualizar diagnóstico
+        uses: actions/github-script@v7
+        env:
+          RUN_ID: ${{ github.run_id }}
+          COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- ci-fallo-diagnostico -->';
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${process.env.RUN_ID}`;
+            const log = fs.existsSync('pytest.log')
+              ? fs.readFileSync('pytest.log', 'utf8')
+              : 'No se pudo descargar el log de pytest. Consulta la ejecución de GitHub Actions.';
+
+            const errorMatch = log.match(/(?:[A-Za-z_][A-Za-z0-9_]*Error|Exception):[^\n]+/);
+            const locationMatch = log.match(/(?:src|tests)\/[^\n:]+\.py, line \d+/);
+            const failedTests = [...log.matchAll(/^FAILED (.+)$/gm)]
+              .map(match => match[1])
+              .slice(0, 20);
+            const causa = errorMatch
+              ? `La causa probable está relacionada con la excepción detectada: \`${errorMatch[0].trim()}\`.`
+              : 'El job de pruebas terminó con error; revisa el log adjunto para determinar la causa.';
+            const resumenFallos = failedTests.length
+              ? failedTests.map(test => `- ${test}`).join('\n')
+              : '- No se pudo extraer automáticamente el nombre de la prueba fallida.';
+            const fragmento = log.length > 12000 ? log.slice(-12000) : log;
+            const body = [
+              marker,
+              '## Diagnóstico automático del fallo de CI',
+              '',
+              `- **Run ID:** \`${process.env.RUN_ID}\``,
+              `- **Commit:** \`${process.env.COMMIT_SHA}\``,
+              `- **Error observado:** \`${errorMatch ? errorMatch[0].trim() : 'fallo en las pruebas'}\``,
+              `- **Ubicación detectada:** \`${locationMatch ? locationMatch[0] : 'no extraída automáticamente'}\``,
+              '',
+              '**Pruebas fallidas:**',
+              resumenFallos,
+              '',
+              `**Causa probable:** ${causa}`,
+              '',
+              '**Fragmento del log:**',
+              '```text',
+              fragmento,
+              '```',
+              '',
+              `[Abrir la ejecución completa en GitHub Actions](${runUrl})`,
+              '',
+              '> Este comentario se ha generado automáticamente por GitHub Actions y debe verificarse antes de corregir el código.',
+            ].join('\n');
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner,
+              repo,
+              issue_number,
+              per_page: 100,
+            });
+            const previous = comments.find(comment =>
+              comment.user?.type === 'Bot' && comment.body?.includes(marker)
+            );
+
+            if (previous) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: previous.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body,
+              });
+            }
   despliegue:
     name: Despliegue en contenedor
     needs: tests
