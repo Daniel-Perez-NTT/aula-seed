@@ -37,7 +37,7 @@ def nota_media_ponderada(expediente: Expediente, plan: Plan) -> Decimal:
 
     return (numerador / denominador).quantize(
         DOS_DECIMALES,
-        rounding=ROUND_HALF_UP,
+        rounding=ROUND_DOWN,
     )
 
 

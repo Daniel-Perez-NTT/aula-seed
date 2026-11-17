@@ -92,10 +92,10 @@
     "S7": {
       "estado": "en curso",
       "pistas": 0,
-      "intentos": 3,
+      "intentos": 4,
       "predicciones": {
         "aciertos": 2,
-        "total": 3
+        "total": 4
       },
       "desbloqueada": false,
       "sellada": null
