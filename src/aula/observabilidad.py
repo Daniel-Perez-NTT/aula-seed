@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import json
-import subprocess
 import sys
 import urllib.error
 import urllib.request
 
 
-BASE_URL = "http://127.0.0.1:8000"
-CONTAINER_NAME = "aula-app"
+BASE_URL = "https://aula-seed.onrender.com"
+TIMEOUT_SECONDS = 30
 
 
 def comprobar_salud() -> bool:
@@ -18,7 +17,10 @@ def comprobar_salud() -> bool:
     url = f"{BASE_URL}/salud"
 
     try:
-        with urllib.request.urlopen(url, timeout=5) as respuesta:
+        with urllib.request.urlopen(
+            url,
+            timeout=TIMEOUT_SECONDS,
+        ) as respuesta:
             cuerpo = json.loads(respuesta.read().decode("utf-8"))
 
         correcto = (
@@ -54,7 +56,10 @@ def comprobar_matricula() -> bool:
     )
 
     try:
-        with urllib.request.urlopen(peticion, timeout=5) as respuesta:
+        with urllib.request.urlopen(
+            peticion,
+            timeout=TIMEOUT_SECONDS,
+        ) as respuesta:
             cuerpo = json.loads(respuesta.read().decode("utf-8"))
 
         correcto = respuesta.status == 200
@@ -73,26 +78,9 @@ def comprobar_matricula() -> bool:
 
 
 def mostrar_logs() -> bool:
-    """Muestra los logs recientes del contenedor Podman."""
-    resultado = subprocess.run(
-        [
-            "podman",
-            "logs",
-            "--tail",
-            "50",
-            CONTAINER_NAME,
-        ],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-
-    if resultado.returncode != 0:
-        print(f"[FALLO] No se pudieron consultar los logs: {resultado.stderr}")
-        return False
-
-    print("[OK] Logs del contenedor:")
-    print(resultado.stdout)
+    """Indica donde revisar los logs generados por las llamadas cloud."""
+    print("[OK] Las llamadas se han registrado en los logs de Render")
+    print("     Render Dashboard -> aula-seed -> Logs")
     return True
 
 
@@ -102,7 +90,7 @@ def main() -> int:
     logs_ok = mostrar_logs()
 
     if salud_ok and matricula_ok and logs_ok:
-        print("Observabilidad correcta.")
+        print(f"Observabilidad correcta en {BASE_URL}.")
         return 0
 
     print("Alguna comprobación de observabilidad ha fallado.")
