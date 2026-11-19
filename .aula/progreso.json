@@ -90,15 +90,26 @@
       "sellada": "2026-11-13T07:30:26+00:00"
     },
     "S7": {
-      "estado": "superable",
+      "estado": "sellada",
       "pistas": 0,
-      "intentos": 8,
+      "intentos": 9,
       "predicciones": {
-        "aciertos": 6,
-        "total": 8
+        "aciertos": 7,
+        "total": 9
       },
       "desbloqueada": false,
-      "sellada": null
+      "sellada": "2026-11-19T14:00:24+00:00"
+    },
+    "S8": {
+      "estado": "sellada",
+      "pistas": 0,
+      "intentos": 1,
+      "predicciones": {
+        "aciertos": 1,
+        "total": 1
+      },
+      "desbloqueada": false,
+      "sellada": "2026-11-19T14:00:31+00:00"
     }
   },
   "creado": "2026-10-07T09:43:16+00:00"

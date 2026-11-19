@@ -30,4 +30,4 @@ reversion:
 
 codigo:
   ruta: "agentes/flotilla/prompts/triaje.md"
-  hash_sha256: "d33ea95e122e9df28a99a7a02b142e118f2ed442ddaa6ea16ce85649ac87f7a4"
+  hash_sha256: "6369f4840b4e530b380801d5677e7fe66314c58f0f6113f812c2589018bc79ac"
